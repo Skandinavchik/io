@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken';
+import { promisify } from 'util';
 import { User } from '../models/userModel.js';
 
 const signToken = (id) => {
@@ -16,11 +17,17 @@ const signUp = async (req, res) => {
             password,
         });
 
+        newUser.password = undefined;
+
         const token = signToken(newUser._id);
+
+        res.cookie('jwt', token, {
+            maxAge: 14 * 24 * 60 * 60 * 1000,
+            httpOnly: true,
+        });
 
         res.status(201).json({
             status: 'success',
-            token,
             data: {
                 user: newUser,
             },
@@ -55,9 +62,13 @@ const signIn = async (req, res) => {
 
         const token = signToken(user._id);
 
+        res.cookie('jwt', token, {
+            maxAge: 14 * 24 * 60 * 60 * 1000,
+            httpOnly: true,
+        });
+
         res.status(200).json({
             status: 'success',
-            token,
         });
 
     } catch (error) {
@@ -69,23 +80,40 @@ const signIn = async (req, res) => {
 };
 
 const protect = async (req, res, next) => {
-    let token;
-    const { authorization } = req.headers;
+    try {
+        let token;
+        const { authorization } = req.headers;
 
-    if (authorization && authorization.startsWith('Bearer')) {
-        token = authorization.split(' ')[1];
-    }
+        if (authorization && authorization.startsWith('Bearer')) {
+            token = authorization.split(' ')[1];
+        }
 
-    if (!token) {
-        res.status(401).json({
+        if (!token) {
+            res.status(401).json({
+                status: 'failed',
+                message: 'Please sign in to get access',
+            });
+            return;
+        }
+
+        const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+
+        const user = await User.findById(decoded.id);
+        if (!user) {
+            res.status(401).json({
+                status: 'failed',
+                message: 'User with this token no longer exists',
+            });
+            return;
+        }
+
+        next();
+    } catch (error) {
+        res.status(500).json({
             status: 'failed',
-            message: 'Please sign in to get access',
+            message: error.message,
         });
-        return;
     }
-
-    
-    next();
 };
 
 export { signUp, signIn, protect };

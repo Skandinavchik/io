@@ -27,8 +27,6 @@ app.use(cors(corsOptions));
 app.use('/api/v1.0/users', usersRouter);
 
 
-
-
 const server = app.listen(port, host, () => {
     console.log(`Server started on ${host}:${port} 🚀`);
 });
