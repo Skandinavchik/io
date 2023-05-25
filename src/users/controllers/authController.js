@@ -24,6 +24,12 @@ const signUp = async (req, res) => {
         res.cookie('jwt', token, {
             maxAge: 14 * 24 * 60 * 60 * 1000,
             httpOnly: true,
+            origin: 'http://localhost:3000',
+        });
+        res.cookie('data', 'data', {
+            maxAge: 14 * 24 * 60 * 60 * 1000,
+            httpOnly: false,
+            origin: 'http://localhost:3000',
         });
 
         res.status(201).json({
@@ -65,6 +71,12 @@ const signIn = async (req, res) => {
         res.cookie('jwt', token, {
             maxAge: 14 * 24 * 60 * 60 * 1000,
             httpOnly: true,
+            origin: 'http://localhost:3000',
+        });
+        res.cookie('data', 'data', {
+            maxAge: 14 * 24 * 60 * 60 * 1000,
+            httpOnly: false,
+            origin: 'http://localhost:3000',
         });
 
         res.status(200).json({
@@ -79,6 +91,23 @@ const signIn = async (req, res) => {
     }
 };
 
+const logout = (req, res) => {
+    res.cookie('jwt', 'loggedout', {
+        maxAge: 1,
+        httpOnly: true,
+        origin: 'http://localhost:3000',
+    });
+    res.cookie('data', 'data', {
+        maxAge: 1,
+        httpOnly: false,
+        origin: 'http://localhost:3000',
+    });
+
+    res.status(200).json({
+        status: 'success',
+    });
+};
+
 const protect = async (req, res, next) => {
     try {
         let token;
@@ -86,6 +115,8 @@ const protect = async (req, res, next) => {
 
         if (authorization && authorization.startsWith('Bearer')) {
             token = authorization.split(' ')[1];
+        } else if (req.cookies.jwt) {
+            token = req.cookies.jwt;
         }
 
         if (!token) {
@@ -116,4 +147,4 @@ const protect = async (req, res, next) => {
     }
 };
 
-export { signUp, signIn, protect };
+export { signUp, signIn, logout, protect };

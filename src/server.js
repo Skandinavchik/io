@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
 dotenv.config({ path: './config.env' });
 import express from 'express';
+import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import { Server } from "socket.io";
 import mongoose from 'mongoose';
@@ -17,12 +18,19 @@ const host = process.env.HOST;
 const port = process.env.PORT;
 
 app.use(express.json());
+app.use(cookieParser());
 const corsOptions = {
     origin: 'http://localhost:3000',
     methods: ['GET', 'POST', 'PATCH', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: ['Content-Type'],
+    credentials: true,
 };
 app.use(cors(corsOptions));
+
+// app.use((req, res, next) => {
+    
+//     next();
+// });
 
 app.use('/api/v1.0/users', usersRouter);
 
@@ -33,7 +41,8 @@ const server = app.listen(port, host, () => {
 
 const io = new Server(server, {
     cors: {
-        origin: ['http://localhost:3000']
+        origin: ['http://localhost:3000'],
+        credentials: true,
     }
 });
 
