@@ -12,7 +12,6 @@ mongoose.connect(process.env.DB)
     .then(() => console.log('DB Connected 👌'))
     .catch(err => console.log(err));
 
-
 const app = express();
 const host = process.env.HOST;
 const port = process.env.PORT;
@@ -26,11 +25,6 @@ const corsOptions = {
     credentials: true,
 };
 app.use(cors(corsOptions));
-
-// app.use((req, res, next) => {
-    
-//     next();
-// });
 
 app.use('/api/v1.0/users', usersRouter);
 

@@ -2,7 +2,13 @@ import { User } from '../models/userModel.js';
 
 const getAllUsers = async (req, res) => {
     try {
-        const users = await User.find();
+        const { username } = req.query;
+        
+        let query = User.find(username
+            ? { 'userName': { $regex: `${username}`, $options: 'i' } }
+            : req.query);
+
+        const users = await query;
 
         if (users.length === 0) {
             res.status(200).json({
