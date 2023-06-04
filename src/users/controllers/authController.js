@@ -18,7 +18,6 @@ const signUp = async (req, res) => {
         });
 
         newUser.password = undefined;
-
         const token = signToken(newUser._id);
 
         res.cookie('jwt', token, {
@@ -66,6 +65,7 @@ const signIn = async (req, res) => {
             return;
         }
 
+        user.password = undefined;
         const token = signToken(user._id);
 
         res.cookie('jwt', token, {
@@ -81,6 +81,9 @@ const signIn = async (req, res) => {
 
         res.status(200).json({
             status: 'success',
+            data: {
+                user,
+            },
         });
 
     } catch (error) {
