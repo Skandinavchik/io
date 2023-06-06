@@ -1,10 +1,12 @@
 import dotenv from 'dotenv';
 dotenv.config({ path: './config.env' });
 import express from 'express';
+import mongoose from 'mongoose';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
+import mongoSanitize from 'express-mongo-sanitize';
+import helmet from 'helmet';
 import { Server } from "socket.io";
-import mongoose from 'mongoose';
 import { usersRouter } from './users/routes/userRoute.js';
 
 
@@ -16,15 +18,19 @@ const app = express();
 const host = process.env.HOST;
 const port = process.env.PORT;
 
-app.use(express.json());
-app.use(cookieParser());
 const corsOptions = {
     origin: 'http://localhost:3000',
     methods: ['GET', 'POST', 'PATCH', 'DELETE'],
     allowedHeaders: ['Content-Type'],
     credentials: true,
 };
+
+app.use(helmet());
+app.use(express.json());
 app.use(cors(corsOptions));
+app.use(mongoSanitize());
+app.use(cookieParser());
+
 
 app.use('/api/v1.0/users', usersRouter);
 
@@ -42,10 +48,6 @@ const io = new Server(server, {
 
 io.on('connection', socket => {
     console.log(`Connected: ${socket.id} 👋`);
-
-    socket.on('send', (data) => {
-        socket.broadcast.emit('recieve', data);
-    });
 
     socket.on('disconnect', () => {
         console.log(`Disconnected: ${socket.id} ❌`);
