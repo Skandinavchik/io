@@ -32,7 +32,7 @@ const userSchema = new mongoose.Schema({
         enum: ['guest', 'member', 'host', 'admin'],
         default: 'guest',
     },
-});
+}, { timestamps: true });
 
 userSchema.pre('save', async function(next) {
     if (!this.isModified('password')) return next();

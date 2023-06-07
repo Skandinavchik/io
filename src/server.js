@@ -8,6 +8,8 @@ import mongoSanitize from 'express-mongo-sanitize';
 import helmet from 'helmet';
 import { Server } from "socket.io";
 import { usersRouter } from './users/routes/userRoute.js';
+import { conversationsRouter } from './messages/routes/conversationsRoute.js';
+import { messagesRouter } from './messages/routes/messagesRoute.js';
 
 
 mongoose.connect(process.env.DB)
@@ -33,6 +35,8 @@ app.use(cookieParser());
 
 
 app.use('/api/v1.0/users', usersRouter);
+app.use('/api/v1.0/conversations', conversationsRouter);
+app.use('/api/v1.0/messages', messagesRouter);
 
 
 const server = app.listen(port, host, () => {
